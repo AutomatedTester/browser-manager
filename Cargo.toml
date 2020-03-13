@@ -1,0 +1,11 @@
+[package]
+name = "browser-manager"
+version = "0.1.0"
+authors = ["David Burns <david.burns@theautomatedtester.co.uk>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+which = "3.1.1"
+directories = "2.0"
