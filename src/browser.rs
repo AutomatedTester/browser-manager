@@ -1,5 +1,5 @@
-struct browser {
+struct Browser {
     name: &'static str,
-    driver_path: &' str,
-    browser_path: &' str,
+    driver_path: &'static str,
+    browser_path: &'static str,
 }
