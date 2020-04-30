@@ -16,7 +16,7 @@ fn find_drivers() -> bool {
         match result {
             Ok(path) => {
                 println!("We found it at {}", String::from(path.to_str().unwrap()));
-            },
+            }
             Err(_) => {
                 println!("Executable {} not found", exe);
                 if !need_path {
@@ -28,17 +28,19 @@ fn find_drivers() -> bool {
     need_path
 }
 
-fn need_own_path () -> io::Result<bool> {
+fn need_own_path() -> io::Result<bool> {
     let mut own_path: bool = false;
-    if let Some(proj_dirs) = ProjectDirs::from("org", "webdriver",  "browser-manager") {
+    if let Some(proj_dirs) = ProjectDirs::from("org", "webdriver", "browser-manager") {
         let selenium_dir = proj_dirs.config_dir();
         if selenium_dir.is_dir() {
             println!("Selenium dir is here at {:?}", selenium_dir.to_str());
-
         } else {
             loop {
                 let mut sel_response = String::new();
-                println!("You don't seem to have directory {:?}", selenium_dir.to_str());
+                println!(
+                    "You don't seem to have directory {:?}",
+                    selenium_dir.to_str()
+                );
                 println!("Would you like to create it? [Y/n]");
                 io::stdin().read_line(&mut sel_response)?;
                 if sel_response.to_lowercase().trim() == "y" {
@@ -52,7 +54,7 @@ fn need_own_path () -> io::Result<bool> {
                         }
                     }
                     break;
-                } else if sel_response.to_lowercase().trim() == "n"{
+                } else if sel_response.to_lowercase().trim() == "n" {
                     println!("You will need to enter in your own path for Selenium to download and install items");
                     own_path = true;
                     break;
@@ -65,7 +67,7 @@ fn need_own_path () -> io::Result<bool> {
     Ok(own_path)
 }
 
-fn get_own_path() -> io::Result<()>{
+fn get_own_path() -> io::Result<()> {
     loop {
         let mut path_dir = String::new();
         io::stdin().read_line(&mut path_dir)?;
@@ -82,22 +84,23 @@ fn get_own_path() -> io::Result<()>{
 }
 
 fn main() {
-
     let matches = App::new("Browser Manager")
-                          .version("0.1.0")
-                          .author("David Burns <david.burns@theautomatedtester.co.uk")
-                          .about("Browser manager for selenium to download browsers and drivers")
-                          .arg(Arg::with_name("browser")
-                               .short("b")
-                               .long("browser")
-                               .value_name("browser_name")
-                               .help("Select the browser you wish to you with version. E.g. Firefox@69")
-                               .takes_value(true))
-                          .get_matches();
-    
+        .version("0.1.0")
+        .author("David Burns <david.burns@theautomatedtester.co.uk")
+        .about("Browser manager for selenium to download browsers and drivers")
+        .arg(
+            Arg::with_name("browser")
+                .short("b")
+                .long("browser")
+                .value_name("browser_name")
+                .help("Select the browser you wish to you with version. E.g. Firefox@69")
+                .takes_value(true),
+        )
+        .get_matches();
+
     let need_driver_path = find_drivers();
     println!("Driver path found: {}", need_driver_path);
-    
+
     if need_driver_path {
         let needs_own_path = need_own_path();
 
@@ -106,11 +109,11 @@ fn main() {
                 if own_path {
                     let got_own_path = get_own_path();
                     match got_own_path {
-                        Ok(_) => {},
+                        Ok(_) => {}
                         Err(_) => {}
                     }
                 }
-            },
+            }
             Err(_) => {}
         }
     }
