@@ -7,7 +7,7 @@ use std::io;
 use std::path::Path;
 use which::which;
 
-fn find_drivers() -> bool {
+fn can_find_drivers() -> bool {
     let exes = ["geckodriver", "chromedriver"];
     let mut need_path: bool = false;
 
@@ -98,8 +98,7 @@ fn main() {
         )
         .get_matches();
 
-    let need_driver_path = find_drivers();
-    println!("Driver path found: {}", need_driver_path);
+    let need_driver_path = can_find_drivers();
 
     if need_driver_path {
         let needs_own_path = need_own_path();
