@@ -6,7 +6,7 @@ DO NOT EDIT! Replaced on runs of cargo-raze
 package(default_visibility = [
   # Public for visibility by "@raze__crate__version//" targets.
   #
-  # Prefer access through "//cargo", which limits external
+  # Prefer access through "//", which limits external
   # visibility to explicit Cargo.toml dependencies.
   "//visibility:public",
 ])
@@ -33,11 +33,11 @@ rust_library(
     edition = "2018",
     srcs = glob(["**/*.rs"]),
     deps = [
-        "//cargo/vendor/addr2line-0.12.1:addr2line",
-        "//cargo/vendor/cfg-if-0.1.10:cfg_if",
-        "//cargo/vendor/libc-0.2.71:libc",
-        "//cargo/vendor/object-0.19.0:object",
-        "//cargo/vendor/rustc-demangle-0.1.16:rustc_demangle",
+        "//vendor/addr2line-0.12.1:addr2line",
+        "//vendor/cfg-if-0.1.10:cfg_if",
+        "//vendor/libc-0.2.71:libc",
+        "//vendor/object-0.19.0:object",
+        "//vendor/rustc-demangle-0.1.16:rustc_demangle",
     ],
     rustc_flags = [
         "--cap-lints=allow",

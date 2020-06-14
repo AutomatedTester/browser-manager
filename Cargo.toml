@@ -6,7 +6,7 @@ edition = "2018"
 
 [raze]
 # The WORKSPACE relative path to the Cargo.toml working directory.
-workspace_path = "//cargo"
+workspace_path = "//"
 
 [lib]
 path = "fake_lib.rs"

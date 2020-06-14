@@ -6,7 +6,7 @@ DO NOT EDIT! Replaced on runs of cargo-raze
 package(default_visibility = [
   # Public for visibility by "@raze__crate__version//" targets.
   #
-  # Prefer access through "//cargo", which limits external
+  # Prefer access through "//", which limits external
   # visibility to explicit Cargo.toml dependencies.
   "//visibility:public",
 ])
@@ -31,9 +31,9 @@ rust_library(
     edition = "2015",
     srcs = glob(["**/*.rs"]),
     deps = [
-        "//cargo/vendor/getrandom-0.1.14:getrandom",
-        "//cargo/vendor/redox_syscall-0.1.56:redox_syscall",
-        "//cargo/vendor/rust-argon2-0.7.0:rust_argon2",
+        "//vendor/getrandom-0.1.14:getrandom",
+        "//vendor/redox_syscall-0.1.56:redox_syscall",
+        "//vendor/rust-argon2-0.7.0:rust_argon2",
     ],
     rustc_flags = [
         "--cap-lints=allow",

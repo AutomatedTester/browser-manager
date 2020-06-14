@@ -6,7 +6,7 @@ DO NOT EDIT! Replaced on runs of cargo-raze
 package(default_visibility = [
   # Public for visibility by "@raze__crate__version//" targets.
   #
-  # Prefer access through "//cargo", which limits external
+  # Prefer access through "//", which limits external
   # visibility to explicit Cargo.toml dependencies.
   "//visibility:public",
 ])
@@ -34,7 +34,7 @@ rust_library(
     edition = "2015",
     srcs = glob(["**/*.rs"]),
     deps = [
-        "//cargo/vendor/unicode-width-0.1.7:unicode_width",
+        "//vendor/unicode-width-0.1.7:unicode_width",
     ],
     rustc_flags = [
         "--cap-lints=allow",

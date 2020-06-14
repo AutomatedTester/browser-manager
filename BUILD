@@ -10,17 +10,17 @@ licenses([
 ])
 alias(
     name = "clap",
-    actual = "//cargo/vendor/clap-2.33.1:clap",
+    actual = "//vendor/clap-2.33.1:clap",
 )
 alias(
     name = "directories",
-    actual = "//cargo/vendor/directories-2.0.2:directories",
+    actual = "//vendor/directories-2.0.2:directories",
 )
 alias(
     name = "toml",
-    actual = "//cargo/vendor/toml-0.5.6:toml",
+    actual = "//vendor/toml-0.5.6:toml",
 )
 alias(
     name = "which",
-    actual = "//cargo/vendor/which-3.1.1:which",
+    actual = "//vendor/which-3.1.1:which",
 )
