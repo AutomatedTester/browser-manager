@@ -15,7 +15,7 @@ bazel_skylib_workspace()
 
 git_repository(
     name="io_bazel_rules_rust",
-    commit="f32695dcd02d9a19e42b9eb7f29a24a8ceb2b858",
+    commit="77ad6cccd16eea725bff3a2311d483dbea51347c",
     remote="https://github.com/bazelbuild/rules_rust.git",
 )
 load("@io_bazel_rules_rust//rust:repositories.bzl", "rust_repositories")
