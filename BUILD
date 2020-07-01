@@ -5,9 +5,28 @@ DO NOT EDIT! Replaced on runs of cargo-raze
 """
 package(default_visibility = ["//visibility:public"])
 
+load(
+    "@io_bazel_rules_rust//rust:rust.bzl",
+    "rust_library",
+    "rust_binary",
+    "rust_test",
+)
+
 licenses([
   "notice" # See individual crates for specific licenses
 ])
+
+rust_binary(
+    name="browser-manager",
+    srcs=glob(["src/*.rs"]),
+    deps=[
+        ":clap",
+        ":which",
+        ":toml",
+        ":directories"
+    ]
+)
+
 alias(
     name = "clap",
     actual = "//vendor/clap-2.33.1:clap",
