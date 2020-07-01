@@ -17,6 +17,7 @@ git_repository(
     name="io_bazel_rules_rust",
     commit="77ad6cccd16eea725bff3a2311d483dbea51347c",
     remote="https://github.com/bazelbuild/rules_rust.git",
+    shallow_since="1592207706 +0200"
 )
 load("@io_bazel_rules_rust//rust:repositories.bzl", "rust_repositories")
 rust_repositories()
