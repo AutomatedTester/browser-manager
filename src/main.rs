@@ -84,7 +84,7 @@ fn get_own_path() -> io::Result<()> {
 }
 
 fn main() {
-    let matches = App::new("Browser Manager")
+    App::new("Browser Manager")
         .version("0.1.0")
         .author("David Burns <david.burns@theautomatedtester.co.uk")
         .about("Browser manager for selenium to download browsers and drivers")
