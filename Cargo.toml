@@ -4,9 +4,9 @@ version = "0.1.0"
 authors = ["David Burns <david.burns@theautomatedtester.co.uk>"]
 edition = "2018"
 
-[raze]
+#[raze]
 # The WORKSPACE relative path to the Cargo.toml working directory.
-workspace_path = "//"
+# workspace_path = "//"
 
 [lib]
 path = "fake_lib.rs"
