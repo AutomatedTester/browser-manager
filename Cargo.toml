@@ -8,8 +8,8 @@ edition = "2018"
 # The WORKSPACE relative path to the Cargo.toml working directory.
 # workspace_path = "//"
 
-[lib]
-path = "fake_lib.rs"
+#[lib]
+#path = "fake_lib.rs"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
