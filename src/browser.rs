@@ -1,5 +1,5 @@
 use std::fs::File;
-use std::io::{BufReader, Error, ErrorKind};
+use std::io::{BufReader, Error};
 use zip::{read, ZipArchive};
 
 struct Browser {
@@ -30,6 +30,8 @@ impl Browser {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::fs::File;
+    use std::io::{ErrorKind, Write};
 
     #[test]
     fn create_browser() {
@@ -49,4 +51,27 @@ mod tests {
         }
     }
 
+    #[test]
+    fn unpack_zip_file_not_zip() {
+        // Setup
+        let mut res_file = File::create("cheese.txt");
+        match res_file {
+            Ok(mut file) => {
+                let mut contents = file.write_all(b"Hello, world!");
+                match contents {
+                    Ok(con) => {
+                        //Test
+                        let firefox = Browser::new(String::from("firefox"), String::from("driver_path"), String::from("browser_path"));
+                        let result = firefox.unpack_zip("cheese.txt".to_string());
+                        match result {
+                            Ok(_) => assert_ne!(1, 2, "Should not have got an Ok on a file that doesn't exist"),
+                            Err(e) => assert_eq!(e.kind(), ErrorKind::Other)
+                        }
+                    },
+                    Err(e) => assert_ne!(1, 2, "Error when writing file for test")
+               }
+            },
+            Err(e) => assert_ne!(1, 2, "Error when creating file for test")
+        }
+    }
 }
