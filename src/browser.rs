@@ -11,9 +11,9 @@ struct Browser {
 impl Browser {
     pub fn new(name: String, driver_path: String, browser_path: String) -> Self {
         Self {
-               name: name,
-               driver_path: driver_path,
-               browser_path:browser_path
+               name,
+               driver_path,
+               browser_path,
             }
     }
 
