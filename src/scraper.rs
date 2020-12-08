@@ -48,7 +48,7 @@ fn parse_for_url(data: HashMap<String, String>) -> String {
                     os = "win".to_string();
                 }
             } else {
-                os = "mac".to_string();
+                os = "osx".to_string();
             }
         }
         None => panic!("Should have received bitness for platform"),
@@ -124,7 +124,7 @@ mod tests {
 
         let result = parse_for_url(data);
         let expected =
-            "https://download.mozilla.org/?product=firefox-latest&os=mac&lang=en-US".to_string();
+            "https://download.mozilla.org/?product=firefox-latest&os=osx&lang=en-US".to_string();
         assert_eq!(result, expected)
     }
 }
