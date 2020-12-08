@@ -32,17 +32,23 @@ fn parse_for_url(data: HashMap<String, String>) -> String {
         Some(plat) => platform = plat,
         None => panic!("Should have received aan application platform"),
     }
-    let bitness;
+    let os: String;
     match data.get("bitness") {
         Some(bits) => {
             if platform == "linux" {
                 if bits == "x86_64" {
-                    bitness = "64".to_string();
+                    os = format!("{}{}", platform, "64".to_string());
                 } else {
-                    bitness = bits.to_string();
+                    os = platform.to_string();
+                }
+            } else if platform == "windows" {
+                if bits == "x86_64" {
+                    os = format!("{}{}", "win".to_string(), "64".to_string());
+                } else {
+                    os = "win".to_string();
                 }
             } else {
-                bitness = bits.to_string();
+                os = "mac".to_string();
             }
         }
         None => panic!("Should have received bitness for platform"),
@@ -54,11 +60,10 @@ fn parse_for_url(data: HashMap<String, String>) -> String {
         None => panic!("Could not find a valid file extension"),
     };
     let path = format!(
-        "{base_url}product={application}-{version}&os={platform}{bitness}&lang=en-US",
+        "{base_url}product={application}-{version}&os={os}&lang=en-US",
         base_url = BASE_URL,
         application = application,
-        platform = platform,
-        bitness = bitness,
+        os = os,
         version = version
     );
     path
@@ -78,6 +83,48 @@ mod tests {
         let result = parse_for_url(data);
         let expected = "https://download.mozilla.org/?product=firefox-latest&os=linux64&lang=en-US"
             .to_string();
+        assert_eq!(result, expected)
+    }
+
+    #[test]
+    fn test_can_parse_version_to_url_for_windows_x86_64() {
+        let mut data = HashMap::new();
+        data.insert("application".to_string(), "firefox".to_string());
+        data.insert("platform".to_string(), "windows".to_string());
+        data.insert("bitness".to_string(), "x86_64".to_string());
+        data.insert("version".to_string(), "latest".to_string());
+
+        let result = parse_for_url(data);
+        let expected =
+            "https://download.mozilla.org/?product=firefox-latest&os=win64&lang=en-US".to_string();
+        assert_eq!(result, expected)
+    }
+
+    #[test]
+    fn test_can_parse_version_to_url_for_windows_x86() {
+        let mut data = HashMap::new();
+        data.insert("application".to_string(), "firefox".to_string());
+        data.insert("platform".to_string(), "windows".to_string());
+        data.insert("bitness".to_string(), "i686".to_string());
+        data.insert("version".to_string(), "latest".to_string());
+
+        let result = parse_for_url(data);
+        let expected =
+            "https://download.mozilla.org/?product=firefox-latest&os=win&lang=en-US".to_string();
+        assert_eq!(result, expected)
+    }
+
+    #[test]
+    fn test_can_parse_version_to_url_for_mac_os() {
+        let mut data = HashMap::new();
+        data.insert("application".to_string(), "firefox".to_string());
+        data.insert("platform".to_string(), "mac".to_string());
+        data.insert("bitness".to_string(), "x86_64".to_string());
+        data.insert("version".to_string(), "latest".to_string());
+
+        let result = parse_for_url(data);
+        let expected =
+            "https://download.mozilla.org/?product=firefox-latest&os=mac&lang=en-US".to_string();
         assert_eq!(result, expected)
     }
 }
