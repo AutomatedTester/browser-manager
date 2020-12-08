@@ -1,4 +1,5 @@
 mod browser;
+mod scraper;
 
 use clap::{App, Arg};
 
@@ -14,7 +15,7 @@ fn main() {
                 .short("b")
                 .long("browser")
                 .value_name("browser_name")
-                .help("Select the browser you wish to you with version. E.g. Firefox@69")
+                .help("Select the browser you wish to you with version. E.g. Firefox@69 or Chrome@latest")
                 .takes_value(true),
         )
         .get_matches();

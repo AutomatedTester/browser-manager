@@ -73,6 +73,7 @@ version = "0.1.0"
 dependencies = [
  "clap",
  "directories",
+ "lazy_static",
  "toml",
  "which",
  "zip",
