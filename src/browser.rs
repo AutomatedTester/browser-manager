@@ -73,10 +73,7 @@ mod tests {
             String::from("browser_path"),
         );
         let download_url = firefox.get_download_url();
-        assert_eq!(
-            "https://download.mozilla.org/?product=firefox-latest&os=osx&lang=en-US",
-            download_url
-        );
+        assert!(download_url.contains("https://download.mozilla.org/?product=firefox-latest"));
     }
 
     #[test]
