@@ -66,10 +66,34 @@ pub fn need_own_path() -> io::Result<bool> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::env;
 
     #[test]
     fn cant_find_drivers() {
-        let need_path = can_find_drivers();
-        assert!(need_path);
+        let drivers = which("geckodriver");
+        match drivers {
+            Ok(path) => match env::var("PATH") {
+                Ok(value) => {
+                    let paths = env::split_paths(&value);
+                    let tmp__ = path.as_path().display().to_string();
+                    let mut tmp_path: Vec<&str> = tmp__.split("/").collect();
+                    tmp_path.pop();
+                    let driver_path = tmp_path.join("/");
+                    let mut new_paths: Vec<String> = vec![];
+                    for pat in paths {
+                        if driver_path.ne(&pat.display().to_string()) {
+                            new_paths.push(pat.display().to_string());
+                        }
+                    }
+
+                    env::set_var("PATH", &new_paths.join(":"));
+
+                    let need_path = can_find_drivers();
+                    assert!(need_path);
+                }
+                Err(_) => {}
+            },
+            Err(_) => {}
+        }
     }
 }
