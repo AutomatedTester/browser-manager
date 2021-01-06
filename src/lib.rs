@@ -62,3 +62,14 @@ pub fn need_own_path() -> io::Result<bool> {
     }
     Ok(own_path)
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn cant_find_drivers() {
+        let need_path = can_find_drivers();
+        assert!(need_path);
+    }
+}
