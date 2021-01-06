@@ -3,7 +3,7 @@ mod scraper;
 
 use clap::{App, Arg};
 
-use browser_manager::{can_find_drivers, get_own_path, need_own_path};
+use browser_manager::{can_find_drivers, need_own_path};
 
 fn main() {
     App::new("Browser Manager")
@@ -26,15 +26,7 @@ fn main() {
         let needs_own_path = need_own_path();
 
         match needs_own_path {
-            Ok(own_path) => {
-                if own_path {
-                    let got_own_path = get_own_path();
-                    match got_own_path {
-                        Ok(_) => {}
-                        Err(_) => {}
-                    }
-                }
-            }
+            Ok(own_path) => if own_path {},
             Err(_) => {}
         }
     }

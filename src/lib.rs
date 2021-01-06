@@ -15,7 +15,6 @@ pub fn can_find_drivers() -> bool {
                 println!("We found it at {}", String::from(path.to_str().unwrap()));
             }
             Err(_) => {
-                println!("Executable {} not found", exe);
                 if !need_path {
                     need_path = true;
                 }
@@ -62,20 +61,4 @@ pub fn need_own_path() -> io::Result<bool> {
         }
     }
     Ok(own_path)
-}
-
-pub fn get_own_path() -> io::Result<()> {
-    loop {
-        let mut path_dir = String::new();
-        io::stdin().read_line(&mut path_dir)?;
-        if Path::new(path_dir.trim()).is_dir() {
-            // Set the PATH
-
-            break;
-        } else {
-            println!("Unfortunately the path given was not a directory. Please enter a directory");
-            path_dir.clear();
-        }
-    }
-    Ok(())
 }
