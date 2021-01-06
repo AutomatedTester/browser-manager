@@ -21,28 +21,28 @@ lazy_static! {
     };
 }
 
-fn parse_for_url(data: HashMap<String, String>) -> String {
+pub fn parse_for_url(data: HashMap<String, &String>) -> String {
     let application;
     match data.get("application") {
         Some(app) => application = app,
         None => panic!("Should have received an application name"),
     }
-    let platform;
+    let platform: String;
     match data.get("platform") {
-        Some(plat) => platform = plat,
-        None => panic!("Should have received aan application platform"),
+        Some(plat) => platform = plat.to_string(),
+        None => panic!("Should have received an application platform"),
     }
     let os: String;
     match data.get("bitness") {
-        Some(bits) => {
-            if platform == "linux" {
-                if bits == "x86_64" {
+        Some(&bits) => {
+            if platform.eq(&"linux".to_string()) {
+                if bits.eq(&"x86_64".to_string()) {
                     os = format!("{}{}", platform, "64".to_string());
                 } else {
                     os = platform.to_string();
                 }
-            } else if platform == "windows" {
-                if bits == "x86_64" {
+            } else if platform.eq(&"windows".to_string()) {
+                if bits.eq(&"x86_64".to_string()) {
                     os = format!("{}{}", "win".to_string(), "64".to_string());
                 } else {
                     os = "win".to_string();
@@ -75,10 +75,14 @@ mod tests {
     #[test]
     fn test_can_parse_version_to_url_for_linux_x86_64() {
         let mut data = HashMap::new();
-        data.insert("application".to_string(), "firefox".to_string());
-        data.insert("platform".to_string(), "linux".to_string());
-        data.insert("bitness".to_string(), "x86_64".to_string());
-        data.insert("version".to_string(), "latest".to_string());
+        let browser = "firefox".to_string();
+        let os = "linux".to_string();
+        let bitness = "x86_64".to_string();
+        let version = "latest".to_string();
+        data.insert("application".to_string(), &browser);
+        data.insert("platform".to_string(), &os);
+        data.insert("bitness".to_string(), &bitness);
+        data.insert("version".to_string(), &version);
 
         let result = parse_for_url(data);
         let expected = "https://download.mozilla.org/?product=firefox-latest&os=linux64&lang=en-US"
@@ -89,10 +93,14 @@ mod tests {
     #[test]
     fn test_can_parse_version_to_url_for_windows_x86_64() {
         let mut data = HashMap::new();
-        data.insert("application".to_string(), "firefox".to_string());
-        data.insert("platform".to_string(), "windows".to_string());
-        data.insert("bitness".to_string(), "x86_64".to_string());
-        data.insert("version".to_string(), "latest".to_string());
+        let firefox = "firefox".to_string();
+        let windows = "windows".to_string();
+        let bitness = "x86_64".to_string();
+        let version = "latest".to_string();
+        data.insert("application".to_string(), &firefox);
+        data.insert("platform".to_string(), &windows);
+        data.insert("bitness".to_string(), &bitness);
+        data.insert("version".to_string(), &version);
 
         let result = parse_for_url(data);
         let expected =
@@ -103,10 +111,14 @@ mod tests {
     #[test]
     fn test_can_parse_version_to_url_for_windows_x86() {
         let mut data = HashMap::new();
-        data.insert("application".to_string(), "firefox".to_string());
-        data.insert("platform".to_string(), "windows".to_string());
-        data.insert("bitness".to_string(), "i686".to_string());
-        data.insert("version".to_string(), "latest".to_string());
+        let firefox = "firefox".to_string();
+        let windows = "windows".to_string();
+        let bitness = "x86".to_string();
+        let version = "latest".to_string();
+        data.insert("application".to_string(), &firefox);
+        data.insert("platform".to_string(), &windows);
+        data.insert("bitness".to_string(), &bitness);
+        data.insert("version".to_string(), &version);
 
         let result = parse_for_url(data);
         let expected =
@@ -117,10 +129,14 @@ mod tests {
     #[test]
     fn test_can_parse_version_to_url_for_mac_os() {
         let mut data = HashMap::new();
-        data.insert("application".to_string(), "firefox".to_string());
-        data.insert("platform".to_string(), "mac".to_string());
-        data.insert("bitness".to_string(), "x86_64".to_string());
-        data.insert("version".to_string(), "latest".to_string());
+        let firefox = "firefox".to_string();
+        let windows = "mac".to_string();
+        let bitness = "x86_64".to_string();
+        let version = "latest".to_string();
+        data.insert("application".to_string(), &firefox);
+        data.insert("platform".to_string(), &windows);
+        data.insert("bitness".to_string(), &bitness);
+        data.insert("version".to_string(), &version);
 
         let result = parse_for_url(data);
         let expected =
