@@ -1,7 +1,6 @@
 use directories::ProjectDirs;
 use std::fs;
 use std::io;
-use std::path::Path;
 use which::which;
 
 pub fn can_find_drivers() -> bool {
