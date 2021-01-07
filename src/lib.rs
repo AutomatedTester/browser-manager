@@ -98,6 +98,7 @@ mod tests {
 
     #[test]
     fn can_find_drivers_on_path() {
+        // This test assumes that drivers are already on the path.
         let need_path = can_find_drivers();
         assert!(!need_path);
     }
