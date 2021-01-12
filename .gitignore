@@ -1,3 +1,7 @@
 /target
 bazel-*
 cheese.txt
+invalid_file_type.txt
+valid_file_type.dmg
+valid_file_type.exe
+valid_file_type.tar.gz

@@ -3,6 +3,7 @@ use std::collections::HashMap;
 use std::env;
 use std::fs::File;
 use std::io::{BufReader, Error};
+use std::path::PathBuf;
 use zip::{read, ZipArchive};
 
 struct Browser {
@@ -38,12 +39,23 @@ impl Browser {
         scraper::parse_for_url(browser_detail)
     }
 
-    pub fn unpack_zip(&self, file: String) -> Result<bool, Error> {
+    fn unpack_zip(&self, file: String) -> Result<bool, Error> {
         let zip_file = File::open(file)?;
         let zip_reader = BufReader::new(zip_file);
 
         let mut _zip = zip::ZipArchive::new(zip_reader)?;
         Ok(true)
+    }
+
+    fn _is_installer(&self, file: PathBuf) -> Result<bool, Error> {
+        let file_path = file.as_path();
+        if self.os.eq(&"linux".to_string()) {
+            Ok(file_path.display().to_string().ends_with(".tar.gz"))
+        } else if self.os.eq(&"windows".to_string()) {
+            Ok(file_path.display().to_string().ends_with(".exe"))
+        } else {
+            Ok(file_path.display().to_string().ends_with(".dmg"))
+        }
     }
 }
 
@@ -52,6 +64,63 @@ mod tests {
     use super::*;
     use std::fs::File;
     use std::io::{ErrorKind, Write};
+
+    #[test]
+    fn check_is_installer_fails_with_wrong_type() {
+        let firefox = Browser::new(
+            String::from("firefox"),
+            String::from("driver_path"),
+            String::from("browser_path"),
+        );
+        let filez = create_file("invalid_file_type.txt".to_string());
+        match filez {
+            Ok(_) => {
+                let file = PathBuf::from("invalid_file_type.txt");
+                let is_installer = firefox._is_installer(file);
+                match is_installer {
+                    Ok(is_it) => {
+                        assert!(!is_it)
+                    }
+                    Err(e) => assert_eq!(e.kind(), ErrorKind::NotFound),
+                }
+            }
+            Err(_) => assert_ne!(1, 2, "Could no create file for test during setup"),
+        }
+    }
+
+    #[test]
+    fn check_is_installer_finds_file() {
+        let firefox = Browser::new(
+            String::from("firefox"),
+            String::from("driver_path"),
+            String::from("browser_path"),
+        );
+
+        let mut file_name = "valid_file_type.".to_string().to_owned();
+        if firefox.os.eq(&"linux".to_string()) {
+            file_name.push_str("tar.gz");
+        } else if firefox.os.eq(&"windows".to_string()) {
+            file_name.push_str("exe");
+        } else {
+            file_name.push_str("dmg");
+        }
+        let fil_name = file_name.clone();
+        println!("{}", fil_name);
+        let filez = create_file(file_name);
+        match filez {
+            Ok(fil) => {
+                let file = PathBuf::from(fil_name);
+                let is_installer = firefox._is_installer(file);
+                match is_installer {
+                    Ok(is_it) => {
+                        assert!(is_it)
+                    }
+                    Err(e) => assert_eq!(e.kind(), ErrorKind::NotFound),
+                }
+            }
+            Err(_) => assert_ne!(1, 2, "Could no create file for test during setup"),
+        }
+    }
 
     #[test]
     fn create_browser() {
