@@ -142,7 +142,6 @@ mod tests {
             file_name.push_str("dmg");
         }
         let fil_name = file_name.clone();
-        println!("{}", fil_name);
         let filez = create_file(file_name);
         match filez {
             Ok(_) => {
