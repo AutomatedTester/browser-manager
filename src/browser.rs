@@ -19,7 +19,14 @@ impl Browser {
     pub fn new(name: String, driver_path: String, browser_path: String) -> Self {
         let os = env::consts::OS.to_string();
         let bitness = env::consts::ARCH.to_string();
-        let version = "latest".to_string();
+        let _versions = name.split("@").collect::<Vec<&str>>();
+        let version;
+        if _versions.len() > 1 {
+            version = _versions[1].to_string();
+        } else {
+            version = "latest".to_string();
+        }
+
         Self {
             name,
             driver_path,
@@ -64,6 +71,36 @@ mod tests {
     use super::*;
     use std::fs::File;
     use std::io::{ErrorKind, Write};
+
+    #[test]
+    fn create_new_strut_with_version_included() {
+        let browser = Browser::new(
+            "firefox@69".to_string(),
+            "driver_path".to_string(),
+            "browser_path".to_string(),
+        );
+        assert_eq!(browser.version, "69".to_string());
+    }
+
+    #[test]
+    fn create_new_strut_with_version_as_latest() {
+        let browser = Browser::new(
+            "firefox@latest".to_string(),
+            "driver_path".to_string(),
+            "browser_path".to_string(),
+        );
+        assert_eq!(browser.version, "latest".to_string());
+    }
+
+    #[test]
+    fn create_new_strut_with_no_version_passed_in() {
+        let browser = Browser::new(
+            "firefox".to_string(),
+            "driver_path".to_string(),
+            "browser_path".to_string(),
+        );
+        assert_eq!(browser.version, "latest".to_string());
+    }
 
     #[test]
     fn check_is_installer_fails_with_wrong_type() {
