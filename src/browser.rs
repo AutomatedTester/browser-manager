@@ -108,7 +108,7 @@ mod tests {
         println!("{}", fil_name);
         let filez = create_file(file_name);
         match filez {
-            Ok(fil) => {
+            Ok(_) => {
                 let file = PathBuf::from(fil_name);
                 let is_installer = firefox._is_installer(file);
                 match is_installer {
