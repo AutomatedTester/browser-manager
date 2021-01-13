@@ -1,6 +1,7 @@
 use directories::ProjectDirs;
 use std::fs;
 use std::io;
+use std::path::PathBuf;
 use which::which;
 
 pub fn can_find_drivers() -> bool {
@@ -23,43 +24,25 @@ pub fn can_find_drivers() -> bool {
     need_path
 }
 
-pub fn need_own_path() -> io::Result<bool> {
-    let mut own_path: bool = false;
-    if let Some(proj_dirs) = ProjectDirs::from("org", "webdriver", "browser-manager") {
-        let selenium_dir = proj_dirs.config_dir();
-        if selenium_dir.is_dir() {
-            println!("Selenium dir is here at {:?}", selenium_dir.to_str());
-        } else {
-            loop {
-                let mut sel_response = String::new();
-                println!(
-                    "You don't seem to have directory {:?}",
-                    selenium_dir.to_str()
-                );
-                println!("Would you like to create it? [Y/n]");
-                io::stdin().read_line(&mut sel_response)?;
-                if sel_response.to_lowercase().trim() == "y" {
-                    println!("Creating path {:?}", selenium_dir.to_str());
-                    let created = fs::create_dir_all(selenium_dir);
-                    match created {
-                        Ok(_) => println!("Path created"),
-                        Err(_) => {
-                            println!("Could not create path. You will need to create your own directory and pass it in");
-                            own_path = true;
-                        }
-                    }
-                    break;
-                } else if sel_response.to_lowercase().trim() == "n" {
-                    println!("You will need to enter in your own path for Selenium to download and install items");
-                    own_path = true;
-                    break;
-                } else {
-                    sel_response.clear();
+pub fn get_project_dir() -> io::Result<PathBuf> {
+    let proj_dirs = ProjectDirs::from("org", "webdriver", "browser-manager");
+    match proj_dirs {
+        Some(proj_dir) => {
+            let selenium_dir = proj_dir.config_dir();
+            if selenium_dir.is_dir() {
+                Ok(PathBuf::from(selenium_dir))
+            } else {
+                let _created = fs::create_dir_all(selenium_dir);
+                match _created {
+                    Ok(_) => Ok(PathBuf::from(selenium_dir)),
+                    Err(_) => panic!("Could not create the project directory"),
                 }
             }
         }
+        None => {
+            panic!("Could not look up project directory")
+        }
     }
-    Ok(own_path)
 }
 
 #[cfg(test)]
