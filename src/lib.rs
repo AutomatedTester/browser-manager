@@ -163,7 +163,6 @@ mod tests {
         let available_browsers = get_available_browsers();
 
         if is_mac() {
-            println!("{:#?}", available_browsers);
             assert_eq!(available_browsers.len(), 3);
         } else {
             assert_eq!(available_browsers.len(), 2);
