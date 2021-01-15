@@ -38,10 +38,10 @@ pub fn get_project_dir() -> io::Result<PathBuf> {
 }
 
 pub fn get_available_browsers() -> Vec<Browser> {
-    let BROWSERS: Vec<&str> = vec!["firefox", "Google Chrome"];
+    let browsers: Vec<&str> = vec!["firefox", "Google Chrome"];
     let mut available_browsers: Vec<Browser> = vec![];
 
-    for exe in &BROWSERS {
+    for exe in &browsers {
         let result = which(exe);
         match result {
             Ok(path) => {
