@@ -409,7 +409,6 @@ mod tests {
         data.insert("version".to_string(), &version);
 
         let result = parse_for_url(data);
-        println!("{}", result);
         let expected = "https://chromedriver.storage.googleapis.com/".to_string();
         assert!(result.contains(&expected), format!("Result is {}", result))
     }
