@@ -1,5 +1,6 @@
 use lazy_static::lazy_static;
 
+use reqwest;
 use std::collections::HashMap;
 use std::env;
 use std::fs::File;
@@ -68,7 +69,9 @@ impl Browser {
     }
 }
 
-const BASE_URL: &str = "https://download.mozilla.org/?";
+const FIREFOX_BASE_URL: &str = "https://download.mozilla.org/?";
+const CHROME_BASE_URL: &str = "https://chromedriver.storage.googleapis.com/index.html?path=";
+const CHROME_LATEST_URL: &str = "https://chromedriver.storage.googleapis.com/LATEST_RELEASE";
 lazy_static! {
     static ref DEFAULT_FILE_EXTENSIONS: HashMap<String, String> = {
         let mut m = HashMap::new();
@@ -125,13 +128,28 @@ pub fn parse_for_url(data: HashMap<String, &String>) -> String {
         Some(ver) => version = ver,
         None => panic!("Could not find a valid file extension"),
     };
-    let path = format!(
-        "{base_url}product={application}-{version}&os={os}&lang=en-US",
-        base_url = BASE_URL,
-        application = application,
-        os = os,
-        version = version
-    );
+    let mut path: String = "".to_string();
+    if application.eq(&&"firefox".to_string()) {
+        path = format!(
+            "{base_url}product={application}-{version}&os={os}&lang=en-US",
+            base_url = FIREFOX_BASE_URL,
+            application = application,
+            os = os,
+            version = version
+        );
+    } else {
+        let mut latest_version = String::new();
+        if let Ok(response) = reqwest::blocking::get(CHROME_LATEST_URL) {
+            if let Ok(text) = response.text() {
+                latest_version = text;
+            }
+        }
+        path = format!(
+            "{base_url}{latest_version}",
+            base_url = CHROME_BASE_URL,
+            latest_version = latest_version
+        );
+    }
     path
 }
 
@@ -376,5 +394,23 @@ mod tests {
         let expected =
             "https://download.mozilla.org/?product=firefox-latest&os=osx&lang=en-US".to_string();
         assert_eq!(result, expected)
+    }
+
+    #[test]
+    fn can_parse_chrome_url() {
+        let mut data = HashMap::new();
+        let firefox = "chrome".to_string();
+        let windows = "mac".to_string();
+        let bitness = "x86_64".to_string();
+        let version = "latest".to_string();
+        data.insert("application".to_string(), &firefox);
+        data.insert("platform".to_string(), &windows);
+        data.insert("bitness".to_string(), &bitness);
+        data.insert("version".to_string(), &version);
+
+        let result = parse_for_url(data);
+        println!("{}", result);
+        let expected = "https://chromedriver.storage.googleapis.com/".to_string();
+        assert!(result.contains(&expected))
     }
 }
