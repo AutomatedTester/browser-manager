@@ -10,7 +10,7 @@ use zip::{read, ZipArchive};
 
 #[derive(Debug)]
 pub struct Browser {
-    name: String,
+    pub name: String,
     driver_path: String,
     browser_path: String,
     version: String,
