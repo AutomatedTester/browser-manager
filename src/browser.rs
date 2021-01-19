@@ -90,7 +90,7 @@ lazy_static! {
     };
 }
 
-pub fn parse_for_url(data: HashMap<String, &String>) -> String {
+fn parse_for_url(data: HashMap<String, &String>) -> String {
     let application;
     match data.get("application") {
         Some(app) => application = app,
