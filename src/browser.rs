@@ -70,7 +70,7 @@ impl Browser {
 }
 
 const FIREFOX_BASE_URL: &str = "https://download.mozilla.org/?";
-const CHROME_BASE_URL: &str = "https://chromedriver.storage.googleapis.com/index.html?path=";
+const CHROME_BASE_URL: &str = "https://chromedriver.storage.googleapis.com/";
 const CHROME_LATEST_URL: &str = "https://chromedriver.storage.googleapis.com/LATEST_RELEASE";
 lazy_static! {
     static ref DEFAULT_FILE_EXTENSIONS: HashMap<String, String> = {
@@ -96,6 +96,7 @@ pub fn parse_for_url(data: HashMap<String, &String>) -> String {
         Some(app) => application = app,
         None => panic!("Should have received an application name"),
     }
+
     let platform: String;
     match data.get("platform") {
         Some(plat) => platform = plat.to_string(),
@@ -112,12 +113,20 @@ pub fn parse_for_url(data: HashMap<String, &String>) -> String {
                 }
             } else if platform.eq(&"windows".to_string()) {
                 if bits.eq(&"x86_64".to_string()) {
-                    os = format!("{}{}", "win".to_string(), "64".to_string());
+                    if application.eq(&&"chrome".to_string()) {
+                        os = format!("{}{}", "win".to_string(), "32".to_string());
+                    } else {
+                        os = format!("{}{}", "win".to_string(), "64".to_string());
+                    }
                 } else {
                     os = "win".to_string();
                 }
             } else {
-                os = "osx".to_string();
+                if application.eq(&&"chrome".to_string()) {
+                    os = format!("{}{}", "mac".to_string(), "64".to_string());
+                } else {
+                    os = "osx".to_string();
+                }
             }
         }
         None => panic!("Should have received bitness for platform"),
@@ -145,9 +154,10 @@ pub fn parse_for_url(data: HashMap<String, &String>) -> String {
             }
         }
         path = format!(
-            "{base_url}{latest_version}",
+            "{base_url}{latest_version}/chromedriver_{os}.zip",
             base_url = CHROME_BASE_URL,
-            latest_version = latest_version
+            latest_version = latest_version,
+            os = os,
         );
     }
     path
@@ -409,7 +419,41 @@ mod tests {
         data.insert("version".to_string(), &version);
 
         let result = parse_for_url(data);
-        let expected = "https://chromedriver.storage.googleapis.com/".to_string();
+        let expected = "chromedriver_mac64.zip".to_string();
+        assert!(result.contains(&expected), format!("Result is {}", result))
+    }
+
+    #[test]
+    fn can_parse_windows_url_for_chromedriver() {
+        let mut data = HashMap::new();
+        let firefox = "chrome".to_string();
+        let windows = "windows".to_string();
+        let bitness = "x86_64".to_string();
+        let version = "latest".to_string();
+        data.insert("application".to_string(), &firefox);
+        data.insert("platform".to_string(), &windows);
+        data.insert("bitness".to_string(), &bitness);
+        data.insert("version".to_string(), &version);
+
+        let result = parse_for_url(data);
+        let expected = "chromedriver_win32.zip".to_string();
+        assert!(result.contains(&expected), format!("Result is {}", result))
+    }
+
+    #[test]
+    fn can_parse_linux_url_for_chromedriver() {
+        let mut data = HashMap::new();
+        let firefox = "chrome".to_string();
+        let windows = "linux".to_string();
+        let bitness = "x86_64".to_string();
+        let version = "latest".to_string();
+        data.insert("application".to_string(), &firefox);
+        data.insert("platform".to_string(), &windows);
+        data.insert("bitness".to_string(), &bitness);
+        data.insert("version".to_string(), &version);
+
+        let result = parse_for_url(data);
+        let expected = "chromedriver_linux64.zip".to_string();
         assert!(result.contains(&expected), format!("Result is {}", result))
     }
 }
