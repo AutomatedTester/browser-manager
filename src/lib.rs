@@ -183,7 +183,7 @@ mod tests {
         }
     }
 
-    #[test]
+    //#[test]
     fn should_be_found_and_returned() {
         // This test assumes that there is a browser available and found
 
