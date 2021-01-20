@@ -58,6 +58,7 @@ fn get_available_browsers() -> Vec<Browser> {
         let result = which(exe);
         match result {
             Ok(path) => {
+                println!("we found path {:#?}", path);
                 if path.display().to_string().contains("firefox") {
                     let firefox = Browser::new(
                         "firefox".to_string(),
