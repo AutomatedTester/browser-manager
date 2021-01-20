@@ -137,7 +137,7 @@ fn parse_for_url(data: HashMap<String, &String>) -> String {
         Some(ver) => version = ver,
         None => panic!("Could not find a valid file extension"),
     };
-    let mut path: String = "".to_string();
+    let path: String;
     if application.eq(&&"firefox".to_string()) {
         path = format!(
             "{base_url}product={application}-{version}&os={os}&lang=en-US",
