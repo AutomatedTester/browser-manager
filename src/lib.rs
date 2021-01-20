@@ -37,7 +37,20 @@ pub fn get_project_dir() -> io::Result<PathBuf> {
     }
 }
 
-pub fn get_available_browsers() -> Vec<Browser> {
+pub fn find_browser_for(browser_name: String) -> Option<Browser> {
+    let available_browsers = get_available_browsers();
+    let mut found_browser = None;
+
+    for browser in &available_browsers {
+        if browser.name.eq(&browser_name) {
+            found_browser = Some(browser.to_owned());
+            break;
+        }
+    }
+    found_browser
+}
+
+fn get_available_browsers() -> Vec<Browser> {
     let browsers: Vec<&str> = vec!["firefox", "Google Chrome"];
     let mut available_browsers: Vec<Browser> = vec![];
 
@@ -167,6 +180,19 @@ mod tests {
             assert!(available_browsers.len() >= 2);
         } else {
             assert!(available_browsers.len() >= 1);
+        }
+    }
+
+    #[test]
+    fn should_be_found_and_returned() {
+        // This test assumes that there is a browser available and found
+
+        let found_browser = find_browser_for("firefox".to_string());
+        match found_browser {
+            Some(browser) => {
+                assert_eq!(browser.name, "firefox".to_string())
+            }
+            None => assert!(false, "Was not able to find browsers on the machine"),
         }
     }
 }

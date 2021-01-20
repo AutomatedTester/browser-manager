@@ -1,7 +1,7 @@
 mod browser;
 use browser::Browser;
 
-use browser_manager::{can_find_driver, get_available_browsers, get_project_dir};
+use browser_manager::{find_browser_for, get_project_dir};
 
 use clap::{App, Arg};
 
@@ -23,23 +23,5 @@ fn main() {
     if let Ok(proj_dir) = get_project_dir() {
         project_dir = proj_dir;
     }
-
-    let available_browsers = get_available_browsers();
-    let requested_browser = Browser::new(
-        matches.value_of("browser").unwrap().to_string(),
-        "".to_string(),
-        "".to_string(),
-    );
-    let mut found = false;
-    for browser in &available_browsers {
-        if browser.name.eq(&requested_browser.name) {
-            found = true;
-            break;
-        }
-    }
-    if found {
-        println!("We found the browser {}", requested_browser.name);
-    } else {
-        println!("No Browsers were foind");
-    }
+    let found_browser = find_browser_for(matches.value_of("browser").unwrap().to_string());
 }

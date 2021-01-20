@@ -8,7 +8,7 @@ use std::io::{BufReader, Error};
 use std::path::PathBuf;
 use zip::{read, ZipArchive};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Browser {
     pub name: String,
     driver_path: String,
