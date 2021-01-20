@@ -51,7 +51,7 @@ pub fn find_browser_for(browser_name: String) -> Option<Browser> {
 }
 
 fn get_available_browsers() -> Vec<Browser> {
-    let browsers: Vec<&str> = vec!["firefox", "firefox-bin", "Google Chrome", "chrome"];
+    let browsers: Vec<&str> = vec!["firefox", "firefox-bin", "Google Chrome", "google-chrome"];
     let mut available_browsers: Vec<Browser> = vec![];
 
     for exe in &browsers {
@@ -188,10 +188,10 @@ mod tests {
     fn should_be_found_and_returned() {
         // This test assumes that there is a browser available and found
 
-        let found_browser = find_browser_for("chrome".to_string());
+        let found_browser = find_browser_for("chrom".to_string());
         match found_browser {
             Some(browser) => {
-                assert_eq!(browser.name, "chrome".to_string())
+                assert_eq!(browser.name, "chro".to_string())
             }
             None => assert!(false, "Was not able to find browsers on the machine"),
         }
