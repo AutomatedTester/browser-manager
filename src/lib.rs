@@ -187,10 +187,10 @@ mod tests {
     fn should_be_found_and_returned() {
         // This test assumes that there is a browser available and found
 
-        let found_browser = find_browser_for("firefox".to_string());
+        let found_browser = find_browser_for("chrome".to_string());
         match found_browser {
             Some(browser) => {
-                assert_eq!(browser.name, "firefox".to_string())
+                assert_eq!(browser.name, "chrome".to_string())
             }
             None => assert!(false, "Was not able to find browsers on the machine"),
         }
