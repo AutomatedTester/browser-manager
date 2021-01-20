@@ -4,7 +4,7 @@ use reqwest;
 use std::collections::HashMap;
 use std::env;
 use std::fs::File;
-use std::io::{BufReader, Error};
+use std::io::{BufReader, Error, Write};
 use std::path::PathBuf;
 use zip::{read, ZipArchive};
 
@@ -40,7 +40,7 @@ impl Browser {
         }
     }
 
-    pub fn get_download_url(&self) -> String {
+    fn get_download_url(&self) -> String {
         let mut browser_detail = HashMap::new();
         browser_detail.insert("application".to_string(), &self.name);
         browser_detail.insert("platform".to_string(), &self.os);
@@ -90,6 +90,10 @@ lazy_static! {
     };
 }
 
+/// Parse data to create a download URL for the browser.
+/// This method will return a URL like one of the following
+/// Firefox - https://download.mozilla.org/?product=firefox-latest&os=osx&lang=en-US
+/// Chrome - https://chromeenterprise.google/browser/download/thank-you/?platform=WIN64_BUNDLE&channel=stable&usagestats=0
 fn parse_for_url(data: HashMap<String, &String>) -> String {
     let application;
     match data.get("application") {
