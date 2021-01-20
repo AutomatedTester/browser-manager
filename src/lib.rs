@@ -51,7 +51,7 @@ pub fn find_browser_for(browser_name: String) -> Option<Browser> {
 }
 
 fn get_available_browsers() -> Vec<Browser> {
-    let browsers: Vec<&str> = vec!["firefox", "Google Chrome"];
+    let browsers: Vec<&str> = vec!["firefox", "firefox-bin", "Google Chrome", "chrome"];
     let mut available_browsers: Vec<Browser> = vec![];
 
     for exe in &browsers {
