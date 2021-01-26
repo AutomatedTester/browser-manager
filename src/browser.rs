@@ -1,3 +1,5 @@
+use crate::get_project_dir;
+
 use lazy_static::lazy_static;
 
 use reqwest;
@@ -17,7 +19,7 @@ struct DownloadLinks {
 #[derive(Debug, Clone)]
 pub struct Browser {
     pub name: String,
-    driver_path: String,
+    pub driver_path: String,
     browser_path: String,
     version: String,
     bitness: String,
@@ -46,13 +48,48 @@ impl Browser {
         }
     }
 
-    fn get_browser_download_url(&self) -> String {
+    pub fn download(&self) -> Result<Browser, Box<dyn std::error::Error>> {
+        let links = self.get_download_urls();
+        if !self.browser_path.to_lowercase().contains(&self.name) {
+            if let Ok(browser_response) = reqwest::blocking::get(&links.browser_url) {
+                if let Ok(data) = browser_response.bytes() {
+                    let mut browser_download_path = PathBuf::from(&self.browser_path);
+                    browser_download_path.push(format!("{name}_browser.zip", name = &self.name));
+
+                    File::create(browser_download_path)?.write_all(&data)?;
+                }
+            }
+        }
+
+        let mut driver_download_path;
+        if self.driver_path.ne(&"".to_string()) {
+            driver_download_path = PathBuf::from(&self.driver_path);
+        } else {
+            driver_download_path = PathBuf::from(get_project_dir()?);
+        }
+        let display = driver_download_path.clone();
+        driver_download_path.push(format!("{name}_driver.zip", name = &self.name));
+
+        if let Ok(driver_response) = reqwest::blocking::get(&links.driver_url) {
+            if let Ok(data) = driver_response.bytes() {
+                File::create(driver_download_path)?.write_all(&data)?;
+            }
+        }
+
+        Ok(Browser::new(
+            self.name.to_owned(),
+            display.display().to_string(),
+            self.browser_path.to_owned(),
+        ))
+    }
+
+    fn get_download_urls(&self) -> DownloadLinks {
         let mut browser_detail = HashMap::new();
         browser_detail.insert("application".to_string(), &self.name);
         browser_detail.insert("platform".to_string(), &self.os);
         browser_detail.insert("version".to_string(), &self.version);
         browser_detail.insert("bitness".to_string(), &self.bitness);
-        parse_for_urls(browser_detail).browser_url
+        parse_for_urls(browser_detail)
     }
 
     fn unpack_zip(&self, file: String) -> Result<bool, Error> {
@@ -172,7 +209,7 @@ fn parse_for_urls(data: HashMap<String, &String>) -> DownloadLinks {
 
         driver_path = format!(
             "{base_url}{latest_version}/chromedriver_{os}.zip",
-            base_url = CHROME_BASE_URL,
+            base_url = CHROMEDRIVER_BASE_URL,
             latest_version = latest_version,
             os = os,
         );
@@ -294,8 +331,10 @@ mod tests {
             String::from("driver_path"),
             String::from("browser_path"),
         );
-        let download_url = firefox.get_browser_download_url();
-        assert!(download_url.contains("https://download.mozilla.org/?product=firefox-latest"));
+        let download_url = firefox.get_download_urls();
+        assert!(download_url
+            .browser_url
+            .contains("https://download.mozilla.org/?product=firefox-latest"));
     }
 
     #[test]

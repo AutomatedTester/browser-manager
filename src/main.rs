@@ -25,8 +25,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         let found_browser = find_browser_for(browser_needed.to_owned());
 
         match found_browser {
-            Some(browser) => {
+            Some(mut browser) => {
                 // We have found a browser, let's just make sure it is detailed in the project directory
+                if browser.driver_path.eq(&"".to_string()) {
+                    browser = browser.download()?;
+                }
             }
             None => {
                 // No Browsers found, let's get them downloaded and setup
@@ -35,7 +38,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                     project_dir.display().to_string(),
                     project_dir.display().to_string(),
                 );
-                //needed.download(project_dir)?;
+
+                let browser = needed.download()?;
             }
         }
     }
