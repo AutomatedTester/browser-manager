@@ -19,9 +19,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 .takes_value(true),
         )
         .get_matches();
-    let project_dir;
-    if let Ok(proj_dir) = get_project_dir() {
-        project_dir = proj_dir;
+
+    if let Ok(project_dir) = get_project_dir() {
         let browser_needed = matches.value_of("browser").unwrap().to_string();
         let found_browser = find_browser_for(browser_needed.to_owned());
 
@@ -31,7 +30,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             }
             None => {
                 // No Browsers found, let's get them downloaded and setup
-                let needed = Browser::new(browser_needed, "".to_string(), "".to_string());
+                let needed = Browser::new(
+                    browser_needed,
+                    project_dir.display().to_string(),
+                    project_dir.display().to_string(),
+                );
                 //needed.download(project_dir)?;
             }
         }
