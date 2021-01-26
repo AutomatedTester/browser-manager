@@ -9,6 +9,12 @@ use std::path::PathBuf;
 use zip::{read, ZipArchive};
 
 #[derive(Debug, Clone)]
+struct DownloadLinks {
+    browser_url: String,
+    driver_url: String,
+}
+
+#[derive(Debug, Clone)]
 pub struct Browser {
     pub name: String,
     driver_path: String,
@@ -40,13 +46,13 @@ impl Browser {
         }
     }
 
-    fn get_download_url(&self) -> String {
+    fn get_browser_download_url(&self) -> String {
         let mut browser_detail = HashMap::new();
         browser_detail.insert("application".to_string(), &self.name);
         browser_detail.insert("platform".to_string(), &self.os);
         browser_detail.insert("version".to_string(), &self.version);
         browser_detail.insert("bitness".to_string(), &self.bitness);
-        parse_for_url(browser_detail)
+        parse_for_urls(browser_detail).browser_url
     }
 
     fn unpack_zip(&self, file: String) -> Result<bool, Error> {
@@ -69,9 +75,6 @@ impl Browser {
     }
 }
 
-const FIREFOX_BASE_URL: &str = "https://download.mozilla.org/?";
-const CHROME_BASE_URL: &str = "https://chromedriver.storage.googleapis.com/";
-const CHROME_LATEST_URL: &str = "https://chromedriver.storage.googleapis.com/LATEST_RELEASE";
 lazy_static! {
     static ref DEFAULT_FILE_EXTENSIONS: HashMap<String, String> = {
         let mut m = HashMap::new();
@@ -90,11 +93,12 @@ lazy_static! {
     };
 }
 
-/// Parse data to create a download URL for the browser.
-/// This method will return a URL like one of the following
-/// Firefox - https://download.mozilla.org/?product=firefox-latest&os=osx&lang=en-US
-/// Chrome - https://chromeenterprise.google/browser/download/thank-you/?platform=WIN64_BUNDLE&channel=stable&usagestats=0
-fn parse_for_url(data: HashMap<String, &String>) -> String {
+const FIREFOX_BASE_URL: &str = "https://download.mozilla.org/?";
+const CHROME_BASE_URL: &str = "https://chromeenterprise.google/browser/download/thank-you/?platform={}_BUNDLE&channel=stable&usagestats=0";
+const CHROMEDRIVER_BASE_URL: &str = "https://chromedriver.storage.googleapis.com/";
+const CHROMEDRIVER_LATEST_URL: &str = "https://chromedriver.storage.googleapis.com/LATEST_RELEASE";
+
+fn parse_for_urls(data: HashMap<String, &String>) -> DownloadLinks {
     let application;
     match data.get("application") {
         Some(app) => application = app,
@@ -141,30 +145,42 @@ fn parse_for_url(data: HashMap<String, &String>) -> String {
         Some(ver) => version = ver,
         None => panic!("Could not find a valid file extension"),
     };
-    let path: String;
+
+    let browser_path: String;
+    let driver_path: String;
     if application.eq(&&"firefox".to_string()) {
-        path = format!(
+        browser_path = format!(
             "{base_url}product={application}-{version}&os={os}&lang=en-US",
             base_url = FIREFOX_BASE_URL,
             application = application,
-            os = os,
-            version = version
+            version = version,
+            os = os
         );
+        driver_path = "".to_string();
     } else {
         let mut latest_version = String::new();
-        if let Ok(response) = reqwest::blocking::get(CHROME_LATEST_URL) {
+        if let Ok(response) = reqwest::blocking::get(CHROMEDRIVER_LATEST_URL) {
             if let Ok(text) = response.text() {
                 latest_version = text;
             }
         }
-        path = format!(
+        if os.eq(&"mac64") {
+            browser_path = format!("https://chromeenterprise.google/browser/download/thank-you/?platform={}&channel=stable&usagestats=0", os = "UNIVERSAL_MAC_DMG".to_string());
+        } else {
+            browser_path = format!("https://chromeenterprise.google/browser/download/thank-you/?platform={}_BUNDLE&channel=stable&usagestats=0", os = os,);
+        }
+
+        driver_path = format!(
             "{base_url}{latest_version}/chromedriver_{os}.zip",
             base_url = CHROME_BASE_URL,
             latest_version = latest_version,
             os = os,
         );
     }
-    path
+    DownloadLinks {
+        browser_url: browser_path,
+        driver_url: driver_path,
+    }
 }
 
 #[cfg(test)]
@@ -278,7 +294,7 @@ mod tests {
             String::from("driver_path"),
             String::from("browser_path"),
         );
-        let download_url = firefox.get_download_url();
+        let download_url = firefox.get_browser_download_url();
         assert!(download_url.contains("https://download.mozilla.org/?product=firefox-latest"));
     }
 
@@ -350,10 +366,10 @@ mod tests {
         data.insert("bitness".to_string(), &bitness);
         data.insert("version".to_string(), &version);
 
-        let result = parse_for_url(data);
+        let result = parse_for_urls(data);
         let expected = "https://download.mozilla.org/?product=firefox-latest&os=linux64&lang=en-US"
             .to_string();
-        assert_eq!(result, expected)
+        assert_eq!(result.browser_url, expected)
     }
 
     #[test]
@@ -368,10 +384,10 @@ mod tests {
         data.insert("bitness".to_string(), &bitness);
         data.insert("version".to_string(), &version);
 
-        let result = parse_for_url(data);
+        let result = parse_for_urls(data);
         let expected =
             "https://download.mozilla.org/?product=firefox-latest&os=win64&lang=en-US".to_string();
-        assert_eq!(result, expected)
+        assert_eq!(result.browser_url, expected)
     }
 
     #[test]
@@ -386,10 +402,10 @@ mod tests {
         data.insert("bitness".to_string(), &bitness);
         data.insert("version".to_string(), &version);
 
-        let result = parse_for_url(data);
+        let result = parse_for_urls(data);
         let expected =
             "https://download.mozilla.org/?product=firefox-latest&os=win&lang=en-US".to_string();
-        assert_eq!(result, expected)
+        assert_eq!(result.browser_url, expected)
     }
 
     #[test]
@@ -404,14 +420,14 @@ mod tests {
         data.insert("bitness".to_string(), &bitness);
         data.insert("version".to_string(), &version);
 
-        let result = parse_for_url(data);
+        let result = parse_for_urls(data);
         let expected =
             "https://download.mozilla.org/?product=firefox-latest&os=osx&lang=en-US".to_string();
-        assert_eq!(result, expected)
+        assert_eq!(result.browser_url, expected)
     }
 
     #[test]
-    fn can_parse_chrome_url() {
+    fn can_parse_mac_url_for_chromedriver() {
         let mut data = HashMap::new();
         let firefox = "chrome".to_string();
         let windows = "mac".to_string();
@@ -422,9 +438,12 @@ mod tests {
         data.insert("bitness".to_string(), &bitness);
         data.insert("version".to_string(), &version);
 
-        let result = parse_for_url(data);
-        let expected = "chromedriver_mac64.zip".to_string();
-        assert!(result.contains(&expected), format!("Result is {}", result))
+        let result = parse_for_urls(data);
+        let browser_expected = "UNIVERSAL_MAC_DMG".to_string();
+        assert!(
+            result.browser_url.contains(&browser_expected),
+            format!("Result is {:?}", result)
+        )
     }
 
     #[test]
@@ -439,9 +458,12 @@ mod tests {
         data.insert("bitness".to_string(), &bitness);
         data.insert("version".to_string(), &version);
 
-        let result = parse_for_url(data);
+        let result = parse_for_urls(data);
         let expected = "chromedriver_win32.zip".to_string();
-        assert!(result.contains(&expected), format!("Result is {}", result))
+        assert!(
+            result.driver_url.contains(&expected),
+            format!("Result is {:?}", result)
+        )
     }
 
     #[test]
@@ -456,8 +478,11 @@ mod tests {
         data.insert("bitness".to_string(), &bitness);
         data.insert("version".to_string(), &version);
 
-        let result = parse_for_url(data);
+        let result = parse_for_urls(data);
         let expected = "chromedriver_linux64.zip".to_string();
-        assert!(result.contains(&expected), format!("Result is {}", result))
+        assert!(
+            result.driver_url.contains(&expected),
+            format!("Result is {:?}", result)
+        )
     }
 }
