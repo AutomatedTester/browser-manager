@@ -1,7 +1,5 @@
 use crate::get_project_dir;
 
-use lazy_static::lazy_static;
-
 use reqwest;
 use std::collections::HashMap;
 use std::env;
@@ -112,26 +110,7 @@ impl Browser {
     }
 }
 
-lazy_static! {
-    static ref DEFAULT_FILE_EXTENSIONS: HashMap<String, String> = {
-        let mut m = HashMap::new();
-        m.insert("android-api-9".to_string(), "apk".to_string());
-        m.insert("android-api-11".to_string(), "apk".to_string());
-        m.insert("android-api-15".to_string(), "apk".to_string());
-        m.insert("android-api-16".to_string(), "apk".to_string());
-        m.insert("android-x86".to_string(), "apk".to_string());
-        m.insert("linux".to_string(), "tar.bz2".to_string());
-        m.insert("linux64".to_string(), "tar.bz2".to_string());
-        m.insert("mac".to_string(), "dmg".to_string());
-        m.insert("mac64".to_string(), "dmg".to_string());
-        m.insert("win32".to_string(), "exe".to_string());
-        m.insert("win64".to_string(), "exe".to_string());
-        m
-    };
-}
-
 const FIREFOX_BASE_URL: &str = "https://download.mozilla.org/?";
-const CHROME_BASE_URL: &str = "https://chromeenterprise.google/browser/download/thank-you/?platform={}_BUNDLE&channel=stable&usagestats=0";
 const CHROMEDRIVER_BASE_URL: &str = "https://chromedriver.storage.googleapis.com/";
 const CHROMEDRIVER_LATEST_URL: &str = "https://chromedriver.storage.googleapis.com/LATEST_RELEASE";
 
