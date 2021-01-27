@@ -3,8 +3,8 @@ use crate::get_project_dir;
 use reqwest;
 use std::collections::HashMap;
 use std::env;
-use std::fs::File;
-use std::io::{BufReader, Error, Write};
+use std::fs::{create_dir_all, set_permissions, File, Permissions};
+use std::io::{copy, Error, Write};
 use std::path::PathBuf;
 use zip::{read, ZipArchive};
 
@@ -70,7 +70,8 @@ impl Browser {
 
         if let Ok(driver_response) = reqwest::blocking::get(&links.driver_url) {
             if let Ok(data) = driver_response.bytes() {
-                File::create(driver_download_path)?.write_all(&data)?;
+                File::create(&driver_download_path)?.write_all(&data)?;
+                self.unpack_zip(driver_download_path.display().to_string())?;
             }
         }
 
@@ -91,10 +92,47 @@ impl Browser {
     }
 
     fn unpack_zip(&self, file: String) -> Result<bool, Error> {
-        let zip_file = File::open(file)?;
-        let zip_reader = BufReader::new(zip_file);
+        let zip_file = File::open(&file)?;
+        let mut proj_dir = PathBuf::from(file);
+        proj_dir.pop();
 
-        let mut _zip = zip::ZipArchive::new(zip_reader)?;
+        let mut archive = zip::ZipArchive::new(zip_file)?;
+
+        for i in 0..archive.len() {
+            let mut _file = archive.by_index(i).unwrap();
+            let mut outpath = proj_dir.to_owned();
+            outpath.push(_file.sanitized_name());
+
+            if (&*_file.name()).ends_with('/') {
+                println!("File {} extracted to \"{}\"", i, outpath.display());
+                create_dir_all(&outpath).unwrap();
+            } else {
+                println!(
+                    "File {} extracted to \"{}\" ({} bytes)",
+                    i,
+                    outpath.display(),
+                    _file.size()
+                );
+                if let Some(p) = outpath.parent() {
+                    if !p.exists() {
+                        create_dir_all(&p).unwrap();
+                    }
+                }
+                let mut outfile = File::create(&outpath).unwrap();
+                copy(&mut _file, &mut outfile).unwrap();
+            }
+
+            // Get and Set permissions
+            #[cfg(unix)]
+            {
+                use std::os::unix::fs::PermissionsExt;
+
+                if let Some(mode) = _file.unix_mode() {
+                    set_permissions(&outpath, Permissions::from_mode(mode)).unwrap();
+                }
+            }
+        }
+
         Ok(true)
     }
 
