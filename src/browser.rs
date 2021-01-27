@@ -1,12 +1,14 @@
 use crate::get_project_dir;
 
+use flate2::read::GzDecoder;
 use reqwest;
 use std::collections::HashMap;
 use std::env;
 use std::fs::{create_dir_all, set_permissions, File, Permissions};
 use std::io::{copy, Error, Write};
 use std::path::PathBuf;
-use zip::{read, ZipArchive};
+use tar::Archive;
+use zip::ZipArchive;
 
 #[derive(Debug, Clone)]
 struct DownloadLinks {
@@ -66,7 +68,14 @@ impl Browser {
             driver_download_path = PathBuf::from(get_project_dir()?);
         }
         let display = driver_download_path.clone();
-        driver_download_path.push(format!("{name}_driver.zip", name = &self.name));
+        driver_download_path.push(
+            &links
+                .driver_url
+                .split("/")
+                .collect::<Vec<&str>>()
+                .last()
+                .unwrap(),
+        );
 
         if let Ok(driver_response) = reqwest::blocking::get(&links.driver_url) {
             if let Ok(data) = driver_response.bytes() {
@@ -93,42 +102,49 @@ impl Browser {
 
     fn unpack_zip(&self, file: String) -> Result<bool, Error> {
         let zip_file = File::open(&file)?;
+        let is_tarball = file.ends_with(".tar.gz");
         let mut proj_dir = PathBuf::from(file);
         proj_dir.pop();
 
-        let mut archive = zip::ZipArchive::new(zip_file)?;
+        if is_tarball {
+            let tar = GzDecoder::new(zip_file);
+            let mut archive = Archive::new(tar);
+            archive.unpack(proj_dir.to_owned())?;
+        } else {
+            let mut archive = ZipArchive::new(zip_file)?;
 
-        for i in 0..archive.len() {
-            let mut _file = archive.by_index(i).unwrap();
-            let mut outpath = proj_dir.to_owned();
-            outpath.push(_file.sanitized_name());
+            for i in 0..archive.len() {
+                let mut _file = archive.by_index(i).unwrap();
+                let mut outpath = proj_dir.to_owned();
+                outpath.push(_file.sanitized_name());
 
-            if (&*_file.name()).ends_with('/') {
-                println!("File {} extracted to \"{}\"", i, outpath.display());
-                create_dir_all(&outpath).unwrap();
-            } else {
-                println!(
-                    "File {} extracted to \"{}\" ({} bytes)",
-                    i,
-                    outpath.display(),
-                    _file.size()
-                );
-                if let Some(p) = outpath.parent() {
-                    if !p.exists() {
-                        create_dir_all(&p).unwrap();
+                if (&*_file.name()).ends_with('/') {
+                    println!("File {} extracted to \"{}\"", i, outpath.display());
+                    create_dir_all(&outpath).unwrap();
+                } else {
+                    println!(
+                        "File {} extracted to \"{}\" ({} bytes)",
+                        i,
+                        outpath.display(),
+                        _file.size()
+                    );
+                    if let Some(p) = outpath.parent() {
+                        if !p.exists() {
+                            create_dir_all(&p).unwrap();
+                        }
                     }
+                    let mut outfile = File::create(&outpath).unwrap();
+                    copy(&mut _file, &mut outfile).unwrap();
                 }
-                let mut outfile = File::create(&outpath).unwrap();
-                copy(&mut _file, &mut outfile).unwrap();
-            }
 
-            // Get and Set permissions
-            #[cfg(unix)]
-            {
-                use std::os::unix::fs::PermissionsExt;
+                // Get and Set permissions
+                #[cfg(unix)]
+                {
+                    use std::os::unix::fs::PermissionsExt;
 
-                if let Some(mode) = _file.unix_mode() {
-                    set_permissions(&outpath, Permissions::from_mode(mode)).unwrap();
+                    if let Some(mode) = _file.unix_mode() {
+                        set_permissions(&outpath, Permissions::from_mode(mode)).unwrap();
+                    }
                 }
             }
         }
@@ -149,6 +165,8 @@ impl Browser {
 }
 
 const FIREFOX_BASE_URL: &str = "https://download.mozilla.org/?";
+const FIREFOX_DRIVER_BASE_URL: &str = "https://github.com/mozilla/geckodriver/releases/download/";
+const FIREFOX_DRIVER_LATEST: &str = "https://github.com/mozilla/geckodriver/releases/latest";
 const CHROMEDRIVER_BASE_URL: &str = "https://chromedriver.storage.googleapis.com/";
 const CHROMEDRIVER_LATEST_URL: &str = "https://chromedriver.storage.googleapis.com/LATEST_RELEASE";
 
@@ -187,7 +205,7 @@ fn parse_for_urls(data: HashMap<String, &String>) -> DownloadLinks {
                 if application.eq(&&"chrome".to_string()) {
                     os = format!("{}{}", "mac".to_string(), "64".to_string());
                 } else {
-                    os = "osx".to_string();
+                    os = "macos".to_string();
                 }
             }
         }
@@ -202,17 +220,47 @@ fn parse_for_urls(data: HashMap<String, &String>) -> DownloadLinks {
 
     let browser_path: String;
     let driver_path: String;
+    let mut latest_version = String::new();
     if application.eq(&&"firefox".to_string()) {
+        let browser_os;
+        if os.eq(&"macos".to_string()) {
+            browser_os = "osx".to_string();
+        } else {
+            browser_os = os.clone();
+        }
         browser_path = format!(
             "{base_url}product={application}-{version}&os={os}&lang=en-US",
             base_url = FIREFOX_BASE_URL,
             application = application,
             version = version,
-            os = os
+            os = browser_os
         );
-        driver_path = "".to_string();
+        if let Ok(response) = reqwest::blocking::get(FIREFOX_DRIVER_LATEST) {
+            let url = response.url();
+            latest_version = url
+                .as_str()
+                .split("/")
+                .collect::<Vec<&str>>()
+                .last()
+                .unwrap()
+                .to_string();
+        }
+
+        let file_ending;
+        if platform.eq(&"windows".to_string()) {
+            file_ending = ".zip".to_string();
+        } else {
+            file_ending = ".tar.gz".to_string();
+        }
+
+        driver_path = format!(
+            "{base_url}{version}/geckodriver-{version}-{os}{file_ending}",
+            base_url = FIREFOX_DRIVER_BASE_URL,
+            version = latest_version,
+            os = os,
+            file_ending = file_ending
+        );
     } else {
-        let mut latest_version = String::new();
         if let Ok(response) = reqwest::blocking::get(CHROMEDRIVER_LATEST_URL) {
             if let Ok(text) = response.text() {
                 latest_version = text;
@@ -352,6 +400,10 @@ mod tests {
         assert!(download_url
             .browser_url
             .contains("https://download.mozilla.org/?product=firefox-latest"));
+        assert!(
+            download_url.driver_url.contains("geckodriver-v"),
+            format!("Result returned was {:?}", download_url)
+        )
     }
 
     #[test]
