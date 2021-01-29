@@ -14,35 +14,41 @@ use zip::ZipArchive;
 struct DownloadLinks {
     browser_url: String,
     driver_url: String,
+    version: String,
 }
 
 #[derive(Debug, Clone)]
 pub struct Browser {
     pub name: String,
     pub driver_path: String,
-    browser_path: String,
+    pub browser_path: String,
     version: String,
     bitness: String,
     os: String,
 }
 
 impl Browser {
-    pub fn new(name: String, driver_path: String, browser_path: String) -> Self {
+    pub fn new(name: String, driver_path: String, browser_path: String, version: String) -> Self {
         let os = env::consts::OS.to_string();
         let bitness = env::consts::ARCH.to_string();
         let _versions = name.split("@").collect::<Vec<&str>>();
-        let version;
-        if _versions.len() > 1 {
-            version = _versions[1].to_string();
+
+        let _version;
+        if version.eq(&"".to_string()) {
+            if _versions.len() > 1 {
+                _version = _versions[1].to_string();
+            } else {
+                _version = "latest".to_string();
+            }
         } else {
-            version = "latest".to_string();
+            _version = version;
         }
 
         Self {
             name,
             driver_path,
             browser_path,
-            version,
+            version: _version,
             bitness,
             os,
         }
@@ -88,6 +94,7 @@ impl Browser {
             self.name.to_owned(),
             display.display().to_string(),
             self.browser_path.to_owned(),
+            links.version,
         ))
     }
 
@@ -282,6 +289,7 @@ fn parse_for_urls(data: HashMap<String, &String>) -> DownloadLinks {
     DownloadLinks {
         browser_url: browser_path,
         driver_url: driver_path,
+        version: latest_version,
     }
 }
 
@@ -297,6 +305,7 @@ mod tests {
             "firefox@69".to_string(),
             "driver_path".to_string(),
             "browser_path".to_string(),
+            "".to_string(),
         );
         assert_eq!(browser.version, "69".to_string());
     }
@@ -307,6 +316,7 @@ mod tests {
             "firefox@latest".to_string(),
             "driver_path".to_string(),
             "browser_path".to_string(),
+            "".to_string(),
         );
         assert_eq!(browser.version, "latest".to_string());
     }
@@ -317,6 +327,7 @@ mod tests {
             "firefox".to_string(),
             "driver_path".to_string(),
             "browser_path".to_string(),
+            "".to_string(),
         );
         assert_eq!(browser.version, "latest".to_string());
     }
@@ -325,8 +336,9 @@ mod tests {
     fn check_is_installer_fails_with_wrong_type() {
         let firefox = Browser::new(
             String::from("firefox"),
-            String::from("driver_path"),
-            String::from("browser_path"),
+            String::from("".to_string()), // "driver_path"
+            String::from("".to_string()), // "browser_path"
+            "".to_string(),
         );
         let filez = create_file("invalid_file_type.txt".to_string());
         match filez {
@@ -340,7 +352,7 @@ mod tests {
                     Err(e) => assert_eq!(e.kind(), ErrorKind::NotFound),
                 }
             }
-            Err(_) => assert_ne!(1, 2, "Could no create file for test during setup"),
+            Err(_) => assert_ne!(1, 2, "Could not create file for test during setup"),
         }
     }
 
@@ -350,6 +362,7 @@ mod tests {
             String::from("firefox"),
             String::from("driver_path"),
             String::from("browser_path"),
+            "".to_string(),
         );
 
         let mut file_name = "valid_file_type.".to_string().to_owned();
@@ -381,8 +394,9 @@ mod tests {
     fn create_browser() {
         let firefox = Browser::new(
             String::from("firefox"),
-            String::from("driver_path"),
-            String::from("browser_path"),
+            String::from("driver_path".to_string()),
+            String::from("browser_path".to_string()),
+            "".to_string(),
         );
         assert_eq!(firefox.name, String::from("firefox"));
         assert_eq!(firefox.driver_path, String::from("driver_path"));
@@ -393,8 +407,9 @@ mod tests {
     fn create_browser_get_download() {
         let firefox = Browser::new(
             String::from("firefox"),
-            String::from("driver_path"),
-            String::from("browser_path"),
+            String::from("".to_string()), // "driver_path"
+            String::from("".to_string()), // "browser_path"
+            "".to_string(),
         );
         let download_url = firefox.get_download_urls();
         assert!(download_url
@@ -410,8 +425,9 @@ mod tests {
     fn unpack_zip_file_wont_exist() {
         let firefox = Browser::new(
             String::from("firefox"),
-            String::from("driver_path"),
-            String::from("browser_path"),
+            String::from("".to_string()), // "driver_path"
+            String::from("".to_string()), // "browser_path"
+            "".to_string(),
         );
         let result = firefox.unpack_zip("file_wont_exist".to_string());
         match result {
@@ -432,8 +448,9 @@ mod tests {
                 //Test
                 let firefox = Browser::new(
                     String::from("firefox"),
-                    String::from("driver_path"),
-                    String::from("browser_path"),
+                    String::from("".to_string()), // "driver_path"
+                    String::from("".to_string()), // "browser_path"
+                    "".to_string(),
                 );
                 let result = firefox.unpack_zip("cheese.txt".to_string());
                 match result {

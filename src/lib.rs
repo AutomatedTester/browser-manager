@@ -63,6 +63,7 @@ fn get_available_browsers() -> Vec<Browser> {
                         "firefox".to_string(),
                         can_find_driver("geckodriver").display().to_string(),
                         path.display().to_string(),
+                        "".to_string(),
                     );
                     available_browsers.push(firefox);
                 } else {
@@ -70,6 +71,7 @@ fn get_available_browsers() -> Vec<Browser> {
                         "chrome".to_string(),
                         can_find_driver("chromedriver").display().to_string(),
                         path.display().to_string(),
+                        "".to_string(),
                     );
                     available_browsers.push(chrome);
                 }
@@ -103,6 +105,7 @@ fn get_available_browsers() -> Vec<Browser> {
             "Safari".to_string(),
             "/usr/bin/safaridriver".to_string(),
             "/Applications/Safari.app/Contents/MacOS/Safari".to_string(),
+            "".to_string(),
         );
         available_browsers.push(safari);
     }
@@ -118,6 +121,7 @@ fn check_path(name: String, path: &str, driver: &str) -> Option<Browser> {
             name,
             can_find_driver(driver).display().to_string(),
             browser_path.display().to_string(),
+            "".to_string(),
         );
         Some(browser)
     } else {

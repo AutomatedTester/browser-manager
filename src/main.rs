@@ -37,6 +37,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                     browser_needed,
                     project_dir.display().to_string(),
                     project_dir.display().to_string(),
+                    "".to_string(),
                 );
 
                 let browser = needed.download()?;
