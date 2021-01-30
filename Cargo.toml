@@ -4,15 +4,6 @@ version = "0.1.0"
 authors = ["David Burns <david.burns@theautomatedtester.co.uk>"]
 edition = "2018"
 
-#[raze]
-# The WORKSPACE relative path to the Cargo.toml working directory.
-# workspace_path = "//"
-
-#[lib]
-#path = "fake_lib.rs"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
 which = "~4.0"
 directories = "~2.0"
