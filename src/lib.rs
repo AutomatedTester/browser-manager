@@ -6,7 +6,7 @@
 //! The downloads are placed in the result of the
 //! [`get_project_dir`](fn.get_project_dir.html).
 //!
-//! ```
+//! ```bash
 //! USAGE:
 //!    browser-manager [OPTIONS]
 //!
