@@ -1,3 +1,23 @@
+//! # Browser Manager
+//!
+//! The `browser-manager` executable is a tool for downloading and setting
+//! up Selenium Drivers from the browser vendors like Chrome and Firefox.
+//!
+//! The downloads are placed in the result of the
+//! [`get_project_dir`](fn.get_project_dir.html).
+//!
+//! ```
+//! USAGE:
+//!    browser-manager [OPTIONS]
+//!
+//! FLAGS:
+//!    -h, --help       Prints help information
+//!    -V, --version    Prints version information
+//!
+//! OPTIONS:
+//!    -b, --browser <browser_name>    Select the browser you wish to you with version. E.g. Firefox@69 or Chrome@latest
+//! ```
+
 use directories::ProjectDirs;
 use std::env;
 use std::fs;
@@ -8,6 +28,19 @@ use which::which;
 mod browser;
 use crate::browser::Browser;
 
+/// Finds the path of a driver executable name passed in if it's on the
+/// `PATH` environmental variable.
+///
+/// # Arguments
+///
+/// * `driver` - a string with the name of the driver to search for.
+///
+/// # Examples
+///
+/// ```
+/// use browser_manager::can_find_driver;
+/// let can_we = can_find_driver("geckodriver");
+/// ```
 pub fn can_find_driver(driver: &str) -> PathBuf {
     let result = which(driver);
     match result {
@@ -16,6 +49,14 @@ pub fn can_find_driver(driver: &str) -> PathBuf {
     }
 }
 
+/// Finds the base config directory, in a cross platform way, to create a new config directory
+/// for the org.webdriver.browser-manager project. Below are examples
+///
+/// |Platform | Value                                 | Example                                  |
+/// | ------- | ------------------------------------- | ---------------------------------------- |
+/// | Linux   | `$XDG_CONFIG_HOME` or `$HOME`/.config | /home/alice/.config/webdriverbrowsermanager|
+/// | macOS   | `$HOME`/Library/Application Support   | /Users/Alice/Library/Application Support/org.webdriver.browser-manager |
+/// | Windows | `{FOLDERID_RoamingAppData}`           | C:\Users\Alice\AppData\Roaming\webdriver\browser-manager|
 pub fn get_project_dir() -> io::Result<PathBuf> {
     let proj_dirs = ProjectDirs::from("org", "webdriver", "browser-manager");
     match proj_dirs {
@@ -37,6 +78,18 @@ pub fn get_project_dir() -> io::Result<PathBuf> {
     }
 }
 
+/// Finds the browser details if they are available on the `PATH`
+/// environmental variable.
+///
+/// # Arguments
+///
+/// * `browser_name` - A string of the name of the browser that we want to find.
+///
+/// # Example
+/// ```
+/// use browser_manager::find_browser_for;
+/// let browser = find_browser_for("firefox".to_string());
+/// ```
 pub fn find_browser_for(browser_name: String) -> Option<Browser> {
     let available_browsers = get_available_browsers();
     let mut found_browser = None;
