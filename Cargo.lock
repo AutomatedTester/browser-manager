@@ -74,6 +74,7 @@ dependencies = [
  "clap",
  "directories",
  "flate2",
+ "log",
  "reqwest",
  "serde",
  "serde_json",

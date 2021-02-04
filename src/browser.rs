@@ -1,6 +1,7 @@
 use crate::get_project_dir;
 
 use flate2::read::GzDecoder;
+use log::info;
 use reqwest;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
@@ -127,10 +128,10 @@ impl Browser {
                 outpath.push(_file.sanitized_name());
 
                 if (&*_file.name()).ends_with('/') {
-                    println!("File {} extracted to \"{}\"", i, outpath.display());
+                    info!("File {} extracted to \"{}\"", i, outpath.display());
                     create_dir_all(&outpath).unwrap();
                 } else {
-                    println!(
+                    info!(
                         "File {} extracted to \"{}\" ({} bytes)",
                         i,
                         outpath.display(),

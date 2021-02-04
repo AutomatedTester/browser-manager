@@ -4,6 +4,7 @@ use browser::Browser;
 use browser_manager::{find_browser_for, get_project_dir};
 
 use clap::{App, Arg};
+use log::info;
 use std::fs::File;
 use std::io::Write;
 
@@ -32,7 +33,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 if browser.driver_path.eq(&"".to_string()) {
                     browser = browser.download()?;
                     project_dir.push(format!("{}_details.json", browser.name));
-                    println!("About to write to {}", project_dir.display());
+                    info!("About to write to {}", project_dir.display());
                     File::create(project_dir)?
                         .write_all(serde_json::to_string(&browser)?.as_bytes())?;
                 }
@@ -48,7 +49,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
                 let browser = needed.download()?;
                 project_dir.push(format!("{}_details.json", browser.name));
-                println!("About to write to {}", project_dir.display());
+                info!("About to write to {}", project_dir.display());
                 File::create(project_dir)?
                     .write_all(serde_json::to_string(&browser)?.as_bytes())?;
             }
