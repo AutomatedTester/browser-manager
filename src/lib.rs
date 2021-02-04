@@ -55,7 +55,7 @@ pub fn can_find_driver(driver: &str) -> PathBuf {
 /// |Platform | Value                                 | Example                                  |
 /// | ------- | ------------------------------------- | ---------------------------------------- |
 /// | Linux   | `$XDG_CONFIG_HOME` or `$HOME`/.config | /home/alice/.config/webdriverbrowsermanager|
-/// | macOS   | `$HOME`/Library/Application Support   | /Users/Alice/Library/Application Support/org.webdriver.browser-manager |
+/// | macOS   | `$HOME`/Library/Application Support   | /Users/Alice/Library/Preferences/org.webdriver.browser-manager |
 /// | Windows | `{FOLDERID_RoamingAppData}`           | C:\Users\Alice\AppData\Roaming\webdriver\browser-manager|
 pub fn get_project_dir() -> io::Result<PathBuf> {
     let proj_dirs = ProjectDirs::from("org", "webdriver", "browser-manager");
