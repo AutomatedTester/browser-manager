@@ -2,6 +2,7 @@ use crate::get_project_dir;
 
 use flate2::read::GzDecoder;
 use reqwest;
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::env;
 use std::fs::{create_dir_all, set_permissions, File, Permissions};
@@ -17,7 +18,7 @@ struct DownloadLinks {
     version: String,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Browser {
     pub name: String,
     pub driver_path: String,
