@@ -34,20 +34,24 @@ impl Browser {
         let os = env::consts::OS.to_string();
         let bitness = env::consts::ARCH.to_string();
         let _versions = name.split("@").collect::<Vec<&str>>();
+        let mut _name: String = "".to_string();
 
         let _version;
         if version.eq(&"".to_string()) {
             if _versions.len() > 1 {
+                _name = _versions[0].to_lowercase().to_string();
                 _version = _versions[1].to_string();
             } else {
+                _name = name;
                 _version = "latest".to_string();
             }
         } else {
+            _name = name;
             _version = version;
         }
 
         Self {
-            name,
+            name: _name,
             driver_path,
             browser_path,
             version: _version,
@@ -313,6 +317,18 @@ mod tests {
     }
 
     #[test]
+    fn create_new_strut_with_version_as_latest_with_browser_capitalised() {
+        let browser = Browser::new(
+            "Firefox@latest".to_string(),
+            "driver_path".to_string(),
+            "browser_path".to_string(),
+            "".to_string(),
+        );
+        assert_eq!(browser.name, "firefox".to_string());
+        assert_eq!(browser.version, "latest".to_string());
+    }
+
+    #[test]
     fn create_new_strut_with_version_as_latest() {
         let browser = Browser::new(
             "firefox@latest".to_string(),
@@ -320,7 +336,20 @@ mod tests {
             "browser_path".to_string(),
             "".to_string(),
         );
+        assert_eq!(browser.name, "firefox".to_string());
         assert_eq!(browser.version, "latest".to_string());
+    }
+
+    #[test]
+    fn create_new_struct_with_version_parameter() {
+        let browser = Browser::new(
+            "firefox".to_string(),
+            "driver_path".to_string(),
+            "browser_path".to_string(),
+            "v0.29.1".to_string(),
+        );
+        assert_eq!(browser.name, "firefox".to_string());
+        assert_eq!(browser.version, "v0.29.1".to_string());
     }
 
     #[test]

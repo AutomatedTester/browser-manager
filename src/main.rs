@@ -26,7 +26,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     if let Ok(mut project_dir) = get_project_dir() {
         let browser_needed = matches.value_of("browser").unwrap().to_string();
         let found_browser = find_browser_for(browser_needed.to_owned());
-
         match found_browser {
             Some(mut browser) => {
                 // We have found a browser, let's just make sure it is detailed in the project directory
@@ -46,7 +45,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                     project_dir.display().to_string(),
                     "".to_string(),
                 );
-
                 let browser = needed.download()?;
                 project_dir.push(format!("{}_details.json", browser.name));
                 info!("About to write to {}", project_dir.display());
