@@ -125,7 +125,7 @@ impl Browser {
             for i in 0..archive.len() {
                 let mut _file = archive.by_index(i).unwrap();
                 let mut outpath = proj_dir.to_owned();
-                outpath.push(_file.sanitized_name());
+                outpath.push(_file.enclosed_name().unwrap());
 
                 if (&*_file.name()).ends_with('/') {
                     info!("File {} extracted to \"{}\"", i, outpath.display());
