@@ -641,4 +641,21 @@ mod tests {
             format!("Result is {:?}", result)
         )
     }
+
+    #[test]
+    fn can_parse_linux_url_for_edgedriver() {
+        let mut data = HashMap::new();
+        let browser = "edge".to_string();
+        let platform = "linux".to_string();
+        let bitness = "x86_64".to_string();
+        let version = "latest".to_string();
+
+        data.insert("application".to_string(), &browser);
+        data.insert("platform".to_string(), &platform);
+        data.insert("bitness".to_string(), &bitness);
+        data.insert("version".to_string(), &version);
+        let result = parse_for_urls(data);
+        let expected = "MicrosoftEdge-".to_string();
+        assert!(result.driver_url.contains(&expected), "Result is {:?}", result)
+    }
 }
