@@ -182,6 +182,8 @@ const FIREFOX_DRIVER_BASE_URL: &str = "https://github.com/mozilla/geckodriver/re
 const FIREFOX_DRIVER_LATEST: &str = "https://github.com/mozilla/geckodriver/releases/latest";
 const CHROMEDRIVER_BASE_URL: &str = "https://chromedriver.storage.googleapis.com/";
 const CHROMEDRIVER_LATEST_URL: &str = "https://chromedriver.storage.googleapis.com/LATEST_RELEASE";
+const EDGE_BASE_URL: &str = "https://officecdn-microsoft-com.akamaized.net/pr/C1297A47-86C4-4C1F-97FA-950631F94777/MacAutoupdate/";
+const EDGEDRIVER_BASE_URL: &str = "https://msedgedriver.azureedge.net/";
 
 fn parse_for_urls(data: HashMap<String, &String>) -> DownloadLinks {
     let application;
@@ -198,27 +200,29 @@ fn parse_for_urls(data: HashMap<String, &String>) -> DownloadLinks {
     let os: String;
     match data.get("bitness") {
         Some(&bits) => {
-            if platform.eq(&"linux".to_string()) {
-                if bits.eq(&"x86_64".to_string()) {
-                    os = format!("{}{}", platform, "64".to_string());
-                } else {
-                    os = platform.to_string();
-                }
-            } else if platform.eq(&"windows".to_string()) {
-                if bits.eq(&"x86_64".to_string()) {
-                    if application.eq(&&"chrome".to_string()) {
-                        os = format!("{}{}", "win".to_string(), "32".to_string());
-                    } else {
-                        os = format!("{}{}", "win".to_string(), "64".to_string());
+            match platform.as_str() {
+                "linux" => {
+                    match bits.as_str() {
+                        "x86_64" => os = format!("{}{}", platform, "64".to_string()),
+                        _=> os = platform.to_string()
                     }
-                } else {
-                    os = "win".to_string();
-                }
-            } else {
-                if application.eq(&&"chrome".to_string()) {
-                    os = format!("{}{}", "mac".to_string(), "64".to_string());
-                } else {
-                    os = "macos".to_string();
+                },
+                "windows" => {
+                    match bits.as_str() {
+                        "x86_64" => {
+                            match application.as_str() {
+                                "chrome" => os = format!("{}{}", "win".to_string(), "32".to_string()),
+                                _ => os = format!("{}{}", "win".to_string(), "64".to_string())
+                            }
+                        },
+                        _ => os = "win".to_string()
+                    }
+                },
+                _ => {
+                    match application.as_str() {
+                        "chrome" =>os = format!("{}{}", "mac".to_string(), "64".to_string()),
+                        _ => os = "macos".to_string()
+                    }
                 }
             }
         }
