@@ -448,7 +448,7 @@ mod tests {
             .contains("https://download.mozilla.org/?product=firefox-latest"));
         assert!(
             download_url.driver_url.contains("geckodriver-v"),
-            format!("Result returned was {:?}", download_url)
+            "Result returned was {:?}", download_url
         )
     }
 
@@ -598,7 +598,7 @@ mod tests {
         let browser_expected = "UNIVERSAL_MAC_DMG".to_string();
         assert!(
             result.browser_url.contains(&browser_expected),
-            format!("Result is {:?}", result)
+            "Result is {:?}", result
         )
     }
 
@@ -618,7 +618,7 @@ mod tests {
         let expected = "chromedriver_win32.zip".to_string();
         assert!(
             result.driver_url.contains(&expected),
-            format!("Result is {:?}", result)
+            "Result is {:?}", result
         )
     }
 
@@ -638,7 +638,7 @@ mod tests {
         let expected = "chromedriver_linux64.zip".to_string();
         assert!(
             result.driver_url.contains(&expected),
-            format!("Result is {:?}", result)
+            "Result is {:?}", result
         )
     }
 
