@@ -238,64 +238,83 @@ fn parse_for_urls(data: HashMap<String, &String>) -> DownloadLinks {
     let browser_path: String;
     let driver_path: String;
     let mut latest_version = String::new();
-    if application.eq(&&"firefox".to_string()) {
-        let browser_os;
-        if os.eq(&"macos".to_string()) {
-            browser_os = "osx".to_string();
-        } else {
-            browser_os = os.clone();
-        }
-        browser_path = format!(
-            "{base_url}product={application}-{version}&os={os}&lang=en-US",
-            base_url = FIREFOX_BASE_URL,
-            application = application,
-            version = version,
-            os = browser_os
-        );
-        if let Ok(response) = reqwest::blocking::get(FIREFOX_DRIVER_LATEST) {
-            let url = response.url();
-            latest_version = url
-                .as_str()
-                .split("/")
-                .collect::<Vec<&str>>()
-                .last()
-                .unwrap()
-                .to_string();
-        }
-
-        let file_ending;
-        if platform.eq(&"windows".to_string()) {
-            file_ending = ".zip".to_string();
-        } else {
-            file_ending = ".tar.gz".to_string();
-        }
-
-        driver_path = format!(
-            "{base_url}{version}/geckodriver-{version}-{os}{file_ending}",
-            base_url = FIREFOX_DRIVER_BASE_URL,
-            version = latest_version,
-            os = os,
-            file_ending = file_ending
-        );
-    } else {
-        if let Ok(response) = reqwest::blocking::get(CHROMEDRIVER_LATEST_URL) {
-            if let Ok(text) = response.text() {
-                latest_version = text;
+    match application.as_str() {
+        "firefox" => {
+            let browser_os;
+            if os.eq(&"macos".to_string()) {
+                browser_os = "osx".to_string();
+            } else {
+                browser_os = os.clone();
             }
-        }
-        if os.eq(&"mac64") {
-            browser_path = format!("https://chromeenterprise.google/browser/download/thank-you/?platform={}&channel=stable&usagestats=0", os = "UNIVERSAL_MAC_DMG".to_string());
-        } else {
-            browser_path = format!("https://chromeenterprise.google/browser/download/thank-you/?platform={}_BUNDLE&channel=stable&usagestats=0", os = os,);
+            browser_path = format!(
+                "{base_url}product={application}-{version}&os={os}&lang=en-US",
+                base_url = FIREFOX_BASE_URL,
+                application = application,
+                version = version,
+                os = browser_os
+            );
+            if let Ok(response) = reqwest::blocking::get(FIREFOX_DRIVER_LATEST) {
+                let url = response.url();
+                latest_version = url
+                    .as_str()
+                    .split("/")
+                    .collect::<Vec<&str>>()
+                    .last()
+                    .unwrap()
+                    .to_string();
+            }
+
+            let file_ending;
+            if platform.eq(&"windows".to_string()) {
+                file_ending = ".zip".to_string();
+            } else {
+                file_ending = ".tar.gz".to_string();
+            }
+
+            driver_path = format!(
+                "{base_url}{version}/geckodriver-{version}-{os}{file_ending}",
+                base_url = FIREFOX_DRIVER_BASE_URL,
+                version = latest_version,
+                os = os,
+                file_ending = file_ending
+            );
+        },
+        "chrome" => {
+            if let Ok(response) = reqwest::blocking::get(CHROMEDRIVER_LATEST_URL) {
+                if let Ok(text) = response.text() {
+                    latest_version = text;
+                }
+            }
+            if os.eq(&"mac64") {
+                browser_path = format!("https://chromeenterprise.google/browser/download/thank-you/?platform={}&channel=stable&usagestats=0", os = "UNIVERSAL_MAC_DMG".to_string());
+            } else {
+                browser_path = format!("https://chromeenterprise.google/browser/download/thank-you/?platform={}_BUNDLE&channel=stable&usagestats=0", os = os,);
+            }
+
+            driver_path = format!(
+                "{base_url}{latest_version}/chromedriver_{os}.zip",
+                base_url = CHROMEDRIVER_BASE_URL,
+                latest_version = latest_version,
+                os = os,
+            );
+        },
+        _ => {
+            if os.eq(&"mac64") {
+                browser_path = format!("https://officecdn-microsoft-com.akamaized.net/pr/C1297A47-86C4-4C1F-97FA-950631F94777/");
+            } else {
+                browser_path = format!("https://officecdn-microsoft-com.akamaized.net/pr/C1297A47-86C4-4C1F-97FA-950631F94777/");
+            }
+            driver_path = format!(
+                "{base_url}{latest_version}/edgedriver_{os}.zip",
+                base_url = EDGEDRIVER_BASE_URL,
+                latest_version = latest_version,
+                os = os,
+            );
         }
 
-        driver_path = format!(
-            "{base_url}{latest_version}/chromedriver_{os}.zip",
-            base_url = CHROMEDRIVER_BASE_URL,
-            latest_version = latest_version,
-            os = os,
-        );
     }
+
+
     DownloadLinks {
         browser_url: browser_path,
         driver_url: driver_path,
@@ -659,7 +678,7 @@ mod tests {
         data.insert("bitness".to_string(), &bitness);
         data.insert("version".to_string(), &version);
         let result = parse_for_urls(data);
-        let expected = "MicrosoftEdge-".to_string();
+        let expected = "edgedriver_linux64.zip".to_string();
         assert!(result.driver_url.contains(&expected), "Result is {:?}", result)
     }
 }
